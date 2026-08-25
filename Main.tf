@@ -36,54 +36,17 @@ resource "aws_route_table_association" "public_assoc" {
 subnet_id = aws_subnet.subnet-1.id
 route_table_id = aws_route_table.prod-route-table.id
 }
+ 
+module " allow_web" {
+   source = "./security groups/allow_web"
 
-
-
-resource "aws_security_group" "allow_web" {
- name = "allow_web_traffic"
- description = "allow web inbound traffic"
- vpc_id = aws_vpc.prod-vpc.id
-
-
-
- ingress {
-   description = "SSH"
-   from_port = 22
-   to_port = 22
-   protocol = "tcp"
-   cidr_blocks = ["0.0.0.0/0"]
- }
-
- ingress {
-   description = "HTTP"
-   from_port = 80
-   to_port = 80
-   protocol = "tcp"
-   cidr_blocks = ["0.0.0.0/0"]
- }
-
-   ingress {
-   description = "HTTPs"
-   from_port = 443
-   to_port = 443
-   protocol = "tcp"
-   cidr_blocks = ["0.0.0.0/0"]
- }
- egress {
-   from_port = 0
-   to_port = 0
-   protocol = "-1"
-   cidr_blocks = ["0.0.0.0/0"]
- }
- tags = {
-   Name = "allow_web"
- }
+vpc_id = aws_vpc.prod-vpc.id
 }
 
 resource "aws_network_interface" "web-server-nic" {
  subnet_id = aws_subnet.subnet-1.id
  private_ips = ["10.0.1.50"]
- security_groups = [aws_security_group.allow_web.id]
+ security_groups = [module.allow_web.security_group_id]
 }
 
 
